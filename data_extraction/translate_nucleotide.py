@@ -23,11 +23,10 @@ def main():
     # Read in data
     args = get_arguments()
     with args.input_fp.open('r') as fh:
-        descs, seqs = zip(*SimpleFastaParser(fh))
-    seq_obj_gen = (Seq(seq) for seq in seqs)
+        fastas = [(desc, Seq(seq)) for desc, seq in SimpleFastaParser(fh)]
 
     # Translate and write out
-    for desc, seq_obj in zip(descs, seq_obj_gen):
+    for desc, seq_obj in fastas:
         print('>', desc, sep='')
         seq = seq_obj.translate(stop_symbol='')
         for line in [seq[i:i+80] for i in range(0, len(seq), 80)]:
