@@ -60,7 +60,6 @@ assembly_uid=$(echo "cat //LinkSetDb//Id/text()" | xmllint --shell <(echo "${xml
 curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=assembly&id=${assembly_uid}" | xmllint --format -
 ```
 
-
 ## Concurrent requests
 Many of the commands show here will benefit from using concurrent processing and can be wrapped in a parallel command:
 ```bash
