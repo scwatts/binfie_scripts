@@ -25,6 +25,7 @@ curl -s ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump_readme.txt | less
 
 ### nodes.dmp
 The nodes file contains a tree of taxonomy data. The following fields are typically of most use:
+
 | column    | name              | description                   |
 | ---       | ---               | ---                           |
 | 1         | tax_id            | node id                       |
@@ -33,6 +34,7 @@ The nodes file contains a tree of taxonomy data. The following fields are typica
 
 ### names.dmp
 This file contains name information for each taxonomic rank and simply uses `node id` key to map related data.
+
 | column    | name          | description           |
 | ---       | ---           | ---                   |
 | 1         | tax_id        | node id               |
