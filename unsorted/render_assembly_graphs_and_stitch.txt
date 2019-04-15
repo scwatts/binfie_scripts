@@ -1,0 +1,78 @@
+# This script is an example of how to stitch images together. Specifically
+# here, there is a 'new' and 'old' set of assemblies - both of which have an
+# illumina and hybrid assembly. Further, the data is divided into species hi and
+# hpi. This is the directory structure (each 'new'/'old' directory has many
+# isolates within):
+#
+# hi
+# ├── new
+# │   └── M1C073_1
+# │       ├── 1_illumina_only
+# │       │   └── assembly.gfa
+# │       └── 2_hybrid
+# │           └── assembly.gfa
+# └── old
+#     └── M1C073_1
+#         ├── 1_illumina_only
+#         │   └── assembly.gfa
+#         └── 2_hybrid
+#             └── assembly.gfa
+# hpi
+# ├── new
+# │   └── M1C100_3
+# │       ├── 1_illumina_only
+# │       │   └── assembly.gfa
+# │       └── 2_hybrid
+# │           └── assembly.gfa
+# └── old
+#     └── M1C100_3
+#         ├── 1_illumina_only
+#         │   └── assembly.gfa
+#         └── 2_hybrid
+#             └── assembly.gfa
+
+# Render graphs
+parallel 'Bandage image {} {.}.png --height 1000 --width 1000' ::: $(find hi hpi -name 'assembly.gfa')
+
+# Generate canvas
+mkdir -p other
+convert -size 1500x1200 xc:white other/figure_canvas.png
+
+# Create figure
+# Lean on function using outer scope for ${samples} and ${species}
+create_image() {
+  # Generate image
+  for sample in $samples; do
+    tmpdir=$(mktemp -d);
+    for run in new old; do
+      basedir=${species}/${run}/${sample};
+      for type in 1_illumina_only 2_hybrid; do
+        dir=${basedir}/${type};
+        outfp=${tmpdir}/${sample}_${run}_${type}.png;
+        # Add border to image
+        convert ${dir}/assembly.png -bordercolor black -border 2 ${outfp};
+        # Add image to blank cavnas and center as to give it a margin
+        convert other/figure_canvas.png ${outfp} -geometry +250+175 -composite ${outfp};
+        # Annotate with assembly type and run
+        convert ${outfp} -gravity North -pointsize 60 -annotate +0+1100 "${type#*_} (${run})" ${outfp};
+      done;
+      comfp=${tmpdir}/${sample}_${run}_combined.png;
+      # Combine the illumina only and hybrid assembly images
+      convert -append ${tmpdir}/${sample}_${run}_* ${comfp};
+      # Annotate the combined image with run
+      convert ${comfp} -gravity North -pointsize 100 -annotate +0+100 ${run} ${comfp};
+    done;
+    finfp=compiled/${sample}.png;
+    # Merge both the combined old and new run images
+    convert +append ${tmpdir}/${sample}_{old,new}_combined.png ${finfp};
+    # Add species title
+    convert ${finfp} -gravity North -pointsize 140 -annotate +750+110 ${sample} ${finfp};
+    rm -r ${tmpdir};
+  done;
+}
+
+# Run figure creation
+for species in hi hpi; do
+  samples=$(find ${species}/ -name 'M1C*' -type d -printf '%f\n' | sort | uniq);
+  create_image;
+done
