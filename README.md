@@ -9,13 +9,13 @@ Useful code and references for everyday bioinformatics-related tasks
 * **format_conversion**
     * `emboss_distmat_to_ts.py`: convert EMBOSS distance matrix to square matrix in TSV format
     * `snp_table_to_alignment.py`: convert SNP table (RedDog output) to a SNP alignment
+* **project_skeletons**
+    * `cpp_autotools/`: C++ skeleton with autotools and getopt.h argument parsing with tests
 * **reference**
     * `blast.md`: command line BLAST basics - includes blocking and parallelisation
     * `ncbi_eutils.md`: eutils API for pull NCBI database information
     * `ncbi_ftp.md`: URLs to useful files and data
     * `ncbi_taxonomy.md`: usage of NCBI taxonomy database
-* **project_skeletons**
-    * `cpp_autotools/`: C++ skeleton with autotools and getopt.h argument parsing
 * **statistics**
     * `assembly_n50.py`: calculate N50 of assemblies
 * **summarisation**
