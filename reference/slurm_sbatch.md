@@ -28,6 +28,12 @@ module load R/3.5.2-openblas
 
 To automate job submission you can use a for loop and iterate inputs.
 ```bash
+# Export variables for sbatch script
+export vcf_dir=reddog_output/vcf
+export ref_id=NC_000907
+export ref_fp=reddog_output/hi_rdkw_20.gbk
+
+# Submit jobs
 samples="sample_1 sample_2 sample_3 sample_4 sample_5"
 for sample in ${samples}; do
   export sample;
