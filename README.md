@@ -12,10 +12,12 @@ Useful code and references for everyday bioinformatics-related tasks
 * **project_skeletons**
     * `cpp_autotools/`: C++ skeleton with autotools and getopt.h argument parsing with tests
 * **reference**
+    * `bash.md`: some useful reference commands
     * `blast.md`: command line BLAST basics - includes blocking and parallelisation
     * `ncbi_eutils.md`: eutils API for pull NCBI database information
     * `ncbi_ftp.md`: URLs to useful files and data
     * `ncbi_taxonomy.md`: usage of NCBI taxonomy database
+    * `slurm_sbatch.md`: efficient job submission using sbatch
 * **statistics**
     * `assembly_n50.py`: calculate N50 of assemblies
 * **summarisation**
