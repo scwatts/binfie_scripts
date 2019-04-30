@@ -14,6 +14,8 @@ Useful code and references for everyday bioinformatics-related tasks
     * `ncbi_eutils.md`: eutils API for pull NCBI database information
     * `ncbi_ftp.md`: URLs to useful files and data
     * `ncbi_taxonomy.md`: usage of NCBI taxonomy database
+* **project_skeletons**
+    * `cpp_autotools/`: C++ skeleton with autotools and getopt.h argument parsing
 * **statistics**
     * `assembly_n50.py`: calculate N50 of assemblies
 * **summarisation**
