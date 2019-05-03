@@ -10,7 +10,8 @@ Useful code and references for everyday bioinformatics-related tasks
     * `emboss_distmat_to_ts.py`: convert EMBOSS distance matrix to square matrix in TSV format
     * `snp_table_to_alignment.py`: convert SNP table (RedDog output) to a SNP alignment
 * **project_skeletons**
-    * `cpp_autotools/`: C++ skeleton with autotools and getopt.h argument parsing with tests
+    * `cpp_autotools/`: basic C++ project using autotools build system
+    * `python_package/`: pure python package
 * **reference**
     * `bash.md`: some useful reference commands
     * `blast.md`: command line BLAST basics - includes blocking and parallelisation
