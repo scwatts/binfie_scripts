@@ -11,6 +11,7 @@ Useful code and references for everyday bioinformatics-related tasks
     * `snp_table_to_alignment.py`: convert SNP table (RedDog output) to a SNP alignment
 * **project_skeletons**
     * `cpp_autotools/`: basic C++ project using autotools build system
+    * `python_cpp_extension/`: python C++ extension
     * `python_package/`: pure python package
 * **reference**
     * `bash.md`: some useful reference commands
