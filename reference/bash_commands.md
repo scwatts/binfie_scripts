@@ -17,6 +17,11 @@ find . -empty -delete
 find . -xtype l
 ```
 
+## Print filenames of `find` results
+```bash
+find ../long/path/to/search -type f -printf '%f\n'
+```
+
 ## Forwarding with SOCKS proxy (via ssh)
 This requires OpenBSD netcat. Create the tunnel on port 8080
 ```bash
