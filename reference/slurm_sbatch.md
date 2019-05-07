@@ -47,7 +47,7 @@ done
 Note that you cannot supply BASH variables to `#SBATCH` directives but instead must set them when calling `sbatch`.
 
 
-# Submission with sed
+## Submission with sed
 Rather than using BASH variables as above, instead here we use placeholders for each variable that are then substituted for
 the desired values with sed.
 ```bash
