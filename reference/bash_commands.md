@@ -22,6 +22,23 @@ find . -xtype l
 find ../long/path/to/search -type f -printf '%f\n'
 ```
 
+## BASH [[…]]
+Returns a status of 0 or 1 depending expression evaluation
+
+### String regex
+```bash
+if [[ $mystring =~ '*regex*' ]]; then
+  echo "regex matches";
+fi
+```
+
+### Check variable set
+```bash
+if [[ -z ${var+x} ]]; then
+  echo "is unset";
+fi
+```
+
 ## Forwarding with SOCKS proxy (via ssh)
 This requires OpenBSD netcat. Create the tunnel on port 8080
 ```bash
