@@ -14,8 +14,10 @@ Useful code and references for everyday bioinformatics-related tasks
     * `python_cpp_extension/`: python C++ extension
     * `python_package/`: pure python package
 * **reference**
-    * `bash.md`: some useful reference commands
+    * `bash_commands.md`: some useful commands and snippets
     * `blast.md`: command line BLAST basics - includes blocking and parallelisation
+    * `bowtie2.md`: bowtie2 basics
+    * `misc_utility.md`: miscellaneous snippets related to bioinformatics
     * `ncbi_eutils.md`: eutils API for pull NCBI database information
     * `ncbi_ftp.md`: URLs to useful files and data
     * `ncbi_taxonomy.md`: usage of NCBI taxonomy database
