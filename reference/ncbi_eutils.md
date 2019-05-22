@@ -60,6 +60,36 @@ assembly_uid=$(echo "cat //LinkSetDb//Id/text()" | xmllint --shell <(echo "${xml
 curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=assembly&id=${assembly_uid}" | xmllint --format -
 ```
 
+## XPath - some hints
+### Attribute value selection
+In some instances, you'll want select a tag on the basis of an attribute value. For example you want to collect the strain
+name from the following XML:
+```xml
+...
+    <Attributes>
+      <Attribute attribute_name="lat_lon" harmonized_name="lat_lon" display_name="latitude and longitude">41.90 N 12.50 E</Attribute>
+      <Attribute attribute_name="strain" harmonized_name="strain" display_name="strain">RMHi93</Attribute>
+      <Attribute attribute_name="host" harmonized_name="host" display_name="host">Homo sapiens</Attribute>
+      <Attribute attribute_name="collection_date" harmonized_name="collection_date" display_name="collection date">2012-07-20</Attribute>
+      <Attribute attribute_name="pathotype" harmonized_name="pathotype" display_name="pathotype">NTHi</Attribute>
+      <Attribute attribute_name="geo_loc_name" harmonized_name="geo_loc_name" display_name="geographic location">Italy: Roma</Attribute>
+      <Attribute attribute_name="genotype" harmonized_name="genotype" display_name="genotype">ST-105</Attribute>
+      <Attribute attribute_name="isolate" harmonized_name="isolate" display_name="isolate">missing</Attribute>
+      <Attribute attribute_name="host_sex" harmonized_name="host_sex" display_name="host sex">female</Attribute>
+      <Attribute attribute_name="isolation_source" harmonized_name="isolation_source" display_name="isolation source">oropharynx</Attribute>
+      <Attribute attribute_name="collected_by" harmonized_name="collected_by" display_name="collected by">Department of Infectious, Parasitic and Immunomediated Diseases, Istituto Superiore di Sanita, Rome, Italy</Attribute>
+      <Attribute attribute_name="host_age" harmonized_name="host_age" display_name="host age">9 months</Attribute>
+      <Attribute attribute_name="serotype" harmonized_name="serotype" display_name="serotype">NT</Attribute>
+      <Attribute attribute_name="host_disease" harmonized_name="host_disease" display_name="host disease">colonization</Attribute>
+    </Attributes>
+...
+```
+This can be done by using conditional attribute selection in XPath:
+```bash
+echo "cat //Attributes//Attribute[@attribute_name='strain']/text()" | xmllint --shell <(echo "${xml_result}") | sed '/^\//d'
+```
+Where the attribute selection is made within the `[..]`
+
 ## Concurrent requests
 Many of the commands show here will benefit from using concurrent processing and can be wrapped in a parallel command:
 ```bash
