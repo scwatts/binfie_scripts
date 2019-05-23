@@ -29,6 +29,7 @@ Useful code and references for everyday bioinformatics-related tasks
 * **visulisation**
     * `gg_scaling_and_log10p_transform.R`: scale ggtree plots and create custom ggplot2 transforms
     * `mlst_mst.R`: minimum spanning tree from MLST data (SRST2 output)
+    * `colour_palettes.svg`: some reference colour palettes for figures
 * **unsorted**
     * `argument_parsing.py`: wide formatting, non-essential argument suppression
     * `asyncio_basic.py`
