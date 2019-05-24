@@ -17,7 +17,7 @@ def get_arguments():
 
     args = parser.parse_args()
     if not args.input_fp.exists():
-        parser.error('Input file %s does not exist' % input_fp)
+        parser.error('Input file %s does not exist' % args.input_fp)
     return args
 
 

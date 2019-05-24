@@ -10,7 +10,6 @@ def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_fp', required=True, type=pathlib.Path,
             help='Input snp table')
-
     args = parser.parse_args()
     if not args.input_fp.exists():
         parser.error('Input file %s does not exist' % args.input_fp)
