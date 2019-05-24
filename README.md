@@ -9,6 +9,7 @@ Useful code and references for everyday bioinformatics-related tasks
 * **format_conversion**
     * `emboss_distmat_to_ts.py`: convert EMBOSS distance matrix to square matrix in TSV format
     * `snp_table_to_alignment.py`: convert SNP table (RedDog output) to a SNP alignment
+    * `subset_snp_table.py`: subset SNP table (RedDog output) with a provided sample list
 * **incomplete**
     * `ena_download.md`: bare example of downloading readsets from ENA given an accession
 * **project_skeletons**
