@@ -37,6 +37,7 @@ Useful code and references for everyday bioinformatics-related tasks
     * `dependencies_check.py`
     * `plot_timeline_piecharts.R`: ggplot timelines, dodging select elements, ggplot2 modification, unscaled piecharts
     * `render_assembly_graphs_and_stitch.txt`: using bandage and imagemagick to render assembly graph comparisons
+    * `rscript_argument_parsing.md`: very basic Rscript argument parser
     * `scrape_imngs_lists.py`: HTTP session, token management, getpass
     * `simulate_reads.py`: blocked streaming of FASTA records, concurrent.futures threading, contextlib, tempfile
     * `urllib2_download.py`
