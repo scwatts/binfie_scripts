@@ -26,7 +26,7 @@ Useful code and references for everyday bioinformatics-related tasks
     * `ncbi_taxonomy.md`: usage of NCBI taxonomy database
     * `slurm_sbatch.md`: efficient job submission using sbatch
 * **statistics**
-    * `assembly_n50.py`: calculate N50 of assemblies
+    * `assembly_stats.py`: calculate N50 and other statistics of assemblies
 * **summarisation**
     * `centrifuge_species.py`: summarise centrifuge counts to species rank
 * **unsorted**
