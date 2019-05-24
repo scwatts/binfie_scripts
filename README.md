@@ -9,6 +9,8 @@ Useful code and references for everyday bioinformatics-related tasks
 * **format_conversion**
     * `emboss_distmat_to_ts.py`: convert EMBOSS distance matrix to square matrix in TSV format
     * `snp_table_to_alignment.py`: convert SNP table (RedDog output) to a SNP alignment
+* **incomplete**
+    * `ena_download.md`: bare example of downloading readsets from ENA given an accession
 * **project_skeletons**
     * `cpp_autotools/`: basic C++ project using autotools build system
     * `python_cpp_extension/`: python C++ extension
@@ -26,10 +28,6 @@ Useful code and references for everyday bioinformatics-related tasks
     * `assembly_n50.py`: calculate N50 of assemblies
 * **summarisation**
     * `centrifuge_species.py`: summarise centrifuge counts to species rank
-* **visulisation**
-    * `gg_scaling_and_log10p_transform.R`: scale ggtree plots and create custom ggplot2 transforms
-    * `mlst_mst.R`: minimum spanning tree from MLST data (SRST2 output)
-    * `colour_palettes.svg`: some reference colour palettes for figures
 * **unsorted**
     * `argument_parsing.py`: wide formatting, non-essential argument suppression
     * `asyncio_basic.py`
@@ -42,3 +40,7 @@ Useful code and references for everyday bioinformatics-related tasks
     * `scrape_imngs_lists.py`: HTTP session, token management, getpass
     * `simulate_reads.py`: blocked streaming of FASTA records, concurrent.futures threading, contextlib, tempfile
     * `urllib2_download.py`
+* **visulisation**
+    * `colour_palettes.svg`: some reference colour palettes for figures
+    * `gg_scaling_and_log10p_transform.R`: scale ggtree plots and create custom ggplot2 transforms
+    * `mlst_mst.R`: minimum spanning tree from MLST data (SRST2 output)
