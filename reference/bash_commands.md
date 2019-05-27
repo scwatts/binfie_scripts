@@ -55,7 +55,7 @@ Download data via rsync through tunnel
 rsync -aPLe "ssh -o ProxyCommand='nc.openbsd -x localhost:8080 %h %p'" server_address:src/ dest/
 ```
 
-# Here documents and strings
+## Here documents and strings
 These features of BASH which allows specification of input data. A good use of this is to simulate user input for an
 interactive command.
 ```bash
@@ -76,6 +76,24 @@ as if it was done
 interactively
 EOF
 ```
+
+## Programmatic screen sessions
+It is sometimes preferable to run software within screen sessions. Occasionally, executing multiple runs of software each
+with their own screen session is desired. To do this, you can programmatically create screens and execute commands:
+```bash
+mkdir -p 2_mapping/logs
+for dir in 2_mapping/M1C*; do
+  sample=${dir##*/};
+  screen_name=hi_${sample};
+  source_cmds="source /home/stephen/other/miniconda3/etc/profile.d/conda.sh; conda activate reddog"
+  reddog_command="rubra --config RedDog_config.py --style run RedDog.py 1>../../logs/${sample}.log 2>&1 <<< 'yes'";
+  screen -dmS ${screen_name} bash -c "${source_cmds}; cd ${dir}/reddog/; ${reddog_command}";
+done
+```
+For each loop iteration, screen calls the bash executable that will run the commands provided by `-c` in the specified
+session. Once all commands have finished the session will terminate. To force session persistence you can append `; exec
+bash` to the `-c` argument.
+
 
 ## Secrets
 Securely generate secret tokens and passwords
