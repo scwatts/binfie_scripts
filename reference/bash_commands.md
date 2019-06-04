@@ -39,6 +39,20 @@ if [[ -z ${var+x} ]]; then
 fi
 ```
 
+## Deterministic bits
+Some GNU programs accept an fd as a source of random bytes - typically used for /dev/random, /dev/urandom, or /dev/zero. You
+can also specify a stream of seeded deterministic bits using openssl. Here is an example that randomly selects 10 files from
+a list using a seed rng
+```bash
+seed=0;
+for file in $(find counts/*tsv | shuf -n10 --random-source=<(openssl enc -aes-128-cbc -pass pass:${seed} -nosalt < /dev/zero 2>/dev/null)); do
+  # Process files in some way
+  my_process $file;
+done
+```
+In cases where no seeding is required, /dev/zero will often suffice.
+
+
 ## Forwarding with SOCKS proxy (via ssh)
 This requires OpenBSD netcat. Create the tunnel on port 8080
 ```bash
@@ -55,9 +69,9 @@ Download data via rsync through tunnel
 rsync -aPLe "ssh -o ProxyCommand='nc.openbsd -x localhost:8080 %h %p'" server_address:src/ dest/
 ```
 
-## Here documents and strings
+## Here documents
 These features of BASH which allows specification of input data. A good use of this is to simulate user input for an
-interactive command.
+interactive command
 ```bash
 ./command_with_prompts << EOF
 yes
@@ -67,7 +81,7 @@ etc
 EOF
 ```
 
-It can be used in simply cases too:
+It can be used in simple cases too:
 ```bash
 cat << EOF
 this data will
