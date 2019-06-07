@@ -4,9 +4,8 @@ This document aims to serve as a basic reference which briefly describes how to 
 and records on the command line. The principal reason for querying NCBI databases from the command line is that it allows
 rapid prototyping and development of workflows. Many of the eutils programs return only xml, for which I use `xmllint` to
 process and capture relevant information via xpath expressions. In cases where you prefer to work with json and the query
-return type permits, I recommend using `jq` for process. When working with hundreds or thousands of samples/records and need
-to make multiple queries for each (e.g. searching, linking, fetch), I have found saving the results of each step to be very
-much worthwhile.
+return type permits, I recommend using `jq`. When working with hundreds or thousands of samples/records and need to make
+multiple queries for each (e.g. searching, linking, fetch), I have found saving the results of each step to be worthwhile.
 
 ## esearch
 I primarily use esearch to obtain the uid of a record from a given accession. In this example, I use esearch to get the uid

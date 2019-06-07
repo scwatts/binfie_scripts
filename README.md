@@ -3,15 +3,13 @@ Useful code and references for everyday bioinformatics-related tasks
 
 ## Contents
 * **data_extraction**
-    * `extract_fasta.py`: extract FASTA records where description has match in word list
+    * `extract_fasta.py`: extract FASTA records where description matches word list
     * `extract_genes.py`: extract DNA sequences from GenBank records
     * `translate_nucleotide.py`: translate nucleotide sequence
 * **format_conversion**
-    * `emboss_distmat_to_ts.py`: convert EMBOSS distance matrix to square matrix in TSV format
+    * `emboss_distmat_to_ts.py`: convert EMBOSS distance matrix to square matrix
     * `snp_table_to_alignment.py`: convert SNP table (RedDog output) to a SNP alignment
-    * `subset_snp_table.py`: subset SNP table (RedDog output) with a provided sample list
-* **incomplete**
-    * `ena_download.md`: bare example of downloading readsets from ENA given an accession
+    * `subset_snp_table.py`: subset SNP table (RedDog output) using a specified sample list
 * **project_skeletons**
     * `cpp_autotools/`: basic C++ project using autotools build system
     * `python_cpp_extension/`: python C++ extension
@@ -20,9 +18,9 @@ Useful code and references for everyday bioinformatics-related tasks
     * `bash_commands.md`: some useful commands and snippets
     * `blast.md`: command line BLAST basics - includes blocking and parallelisation
     * `bowtie2.md`: bowtie2 basics
+    * `genomic_resources.md`: URLs to useful files and data
     * `misc_utility.md`: miscellaneous snippets related to bioinformatics
     * `ncbi_eutils.md`: eutils API for pull NCBI database information
-    * `ncbi_ftp.md`: URLs to useful files and data
     * `ncbi_taxonomy.md`: usage of NCBI taxonomy database
     * `slurm_sbatch.md`: efficient job submission using sbatch
 * **statistics**

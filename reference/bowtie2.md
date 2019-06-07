@@ -35,8 +35,8 @@ parallel 'forward={1}; \
           output=2_bams/${sample}_${ref}.bam; \
           bowtie2 -X 2000 -x ${index} -1 ${forward} -2 ${reverse} | samtools view -uF4 | samtools sort > ${output}' ::: ${forward_reads} ::: ${indices}
 ```
-The parallel command above will map all combinations of read pairs and indices, using as all available cores. This effect is
-achieved using two input command line argument specifiers (denoted by :::) - one for the read sets and one for the indices.
+The parallel command above will map all combinations of read pairs and indices, using all available cores. This effect is
+achieved using two input command line argument specifiers (denoted by :::) - one for read sets and one for indices.
 
 The bowtie2 command first maps the reads, then converts the SAM data in stdout to BAM while removing unmapped reads.
 Following this, the BAM file is sorted and written to disk.

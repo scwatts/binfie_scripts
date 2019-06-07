@@ -26,8 +26,8 @@ assemblies/
 
 Both sanger and rch are project names and each assembly directory is prefixed with a digit (e.g. 3\_hybrid/) - indicating a
 'better' assembly. To always have the 'best' assembly accessible in a standardised way, I place a symlink in the sample
-directory with the name `${sample}.fasta`. Here is a short and simple BASH loop that can do this well-enough that should be
-run in the `assemblies/` directory:
+directory with the name `${sample}.fasta`. Here is a simple BASH loop that can do this well-enough and should be run in the
+`assemblies/` directory:
 
 ```bash
 for project in *; do
