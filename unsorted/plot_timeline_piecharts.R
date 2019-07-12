@@ -48,24 +48,43 @@ require(ggpubr)
 .Options$timeline_offset <- 0.35
 .Options$dodge_width <- 0.5
 .Options$dodge_position_offset <- 0.1
-.Options$pie_radius <- 15
+.Options$pie_radius <- 17.5
 .Options$scale_mod <- 1.2
 .Options$base_plot_height <- 0.75
 
 
 ### Data
-d.info <- read.table('../01_sample_data/general/combined_data.tsv', header=TRUE, sep='\t', stringsAsFactors=FALSE)
-d.pheno <- read.table('../01_sample_data/general/amr_phenotypes.tsv', header=TRUE, sep='\t', stringsAsFactors=FALSE)
+d.info <- read.table('../../sample_data/general/combined_data.tsv', header=TRUE, sep='\t', stringsAsFactors=FALSE)
+d.pheno <- read.table('../../sample_data/general/amr_phenotypes.tsv', header=TRUE, sep='\t', stringsAsFactors=FALSE)
+# Clusters
+read_clusters <- function(fp) {
+  con <- file(fp, 'r')
+  lines <- readLines(con)
+  close(con)
+  strsplit(lines, '\t')
+}
+d.clusters.hi.fp <- '../../analysis/influenzae/transmission_carriage/1_defined_clusters/hi_clusters.txt'
+d.clusters.hpi.fp <- '../../analysis/parainfluenzae/transmission_carriage/1_defined_clusters/hpi_clusters.txt'
+d.clusters.hi <- read_clusters(d.clusters.hi.fp)
+d.clusters.hpi <- read_clusters(d.clusters.hpi.fp)
 
+# Visitation
+d.visits <- read_ods('../../sample_data/general/haemophilus_patient_visitation.ods', sheet='long_format')
+# Set admission and discharge to dates
+d.visits$admission <- as.Date(d.visits$admission, format='%d/%m/%Y')
+d.visits$discharge <- as.Date(d.visits$discharge, format='%d/%m/%Y')
+# For now remove entries with no admission date
+d.visits <- d.visits[!is.na(d.visits$admission), ]
+# For visits without discharge (outpatient) set to same day
+v.no_discharge <- is.na(d.visits$discharge)
+d.visits$discharge[v.no_discharge] <- d.visits$admission[v.no_discharge] + 0.99
+# Remove dates that fall outside of study
+d.visits <- d.visits[d.visits$admission < "2017-02-23", ]
 
 ### Processing
 # Set age and date to appropriate types
 d.info$pariticpant_age <- as.numeric(d.info$pariticpant_age)
 d.info$collection_date <- as.Date(d.info$collection_date, format='%d/%m/%Y')
-
-# Set some clusters
-d.clusters.hi <- list(c('M1C138_2', 'M1C064_1'), c('M1C111_3', 'M1C079_1'), c('M1C112_3', 'M1C112_1'))
-d.clusters.hpi <- list(c('M1C137_3', 'M1C137_4', 'M1C137_2'), c('M1C149_1', 'M1C149_2', 'M1C149_3', 'M1C149_4'), c('M1C147_3', 'M1C147_2', 'M1C098_2', 'M1C147_1'), c('M1C141_1', 'M1C141_4', 'M1C141_2'), c('M1C130_2', 'M1C130_3'), c('M1C113_2', 'M1C113_1'), c('M1C125_4', 'M1C125_5'), c('M1C152_1', 'M1C152_2', 'M1C152_3'), c('M1C100_3', 'M1C059_2'), c('M1C136_2', 'M1C138_1'), c('M1C146_2', 'M1C146_1'), c('M1C142_1', 'M1C142_2'), c('M1C120_2', 'M1C079_4', 'M1C151_2'))
 
 # Sort clusters by patient number
 d.pn.hi <- sapply(d.clusters.hi, function(c) { p <- unique(sub('_[0-9]+$', '', c)); length(p) })
@@ -167,26 +186,31 @@ create_timeline_plot <- function(samples) {
 
   # Get layers for pie charts
   g.pies <- get_pie_charts(d.cluster$filename, d.graph_noanno)
-
-  # Get horizontal line segments
+  
+  # Get horizontal line segments - estimate birthdate
   d.segments.parts <- lapply(patients, function(p) {
     d <- d.cluster[d.cluster$participant==p, ]
-    y1 <- min(d$collection_date)
-    y2 <- max(d$collection_date)
+    bds <- round(d$collection_date - d$pariticpant_age * 365, 1)
+    bd <- mean(bds)
+    y1 <- max(as.Date('2016-01-01'), as.Date(bd, origin='1970-01-01'))
+    y2 <- as.Date('2017-03-01')
     x1 <- x2 <- d.graph_base$x[d.graph_base$participant==p]
-    data.frame(x1=x1, y1=as.Date(y1, origin='1970-01-01'), x2=x2, y2=as.Date(y2, origin='1970-01-01'))
+    data.frame(x1=x1, y1=y1, x2=x2, y2=y2)
   })
-  d.segments <- do.call('rbind', d.segments.parts)
-
+  d.segments_horizontal <- do.call('rbind', d.segments.parts)
+  l.segments_horizontal <- geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=d.segments_horizontal, colour='#444444')
+  
   # Get veritcal line segments
   x.src <- d.graph_base$x[match(sub('_[0-9]+', '', d.graph_noanno$participant), d.graph_base$participant)]
   y <- as.Date(d.graph_noanno$y, origin='1970-01-01')
-  d <- data.frame(x1=x.src, y1=y, x2=d.graph_noanno$x, y2=y)
-  d.segments <- rbind(d.segments, d)
-
+  d.segments_vertical <- data.frame(x1=x.src, y1=y, x2=d.graph_noanno$x, y2=y)
+  l.segments_vertical <- geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=d.segments_vertical, colour='#444444')
+  
+  # Get contact segments, if applicable
+  l.contact <- get_contact_segments(patients)
+  
   # Generate plot
-  l.segments <- geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=d.segments)
-  g <- base_plot() + l.dummy + l.segments + g.pies + l.points
+  g <- base_plot() + l.dummy + l.segments_horizontal + l.contact + l.segments_vertical + g.pies + l.points
 }
 
 split_overlaps <- function(d) {
@@ -256,6 +280,35 @@ base_plot <- function() {
             axis.text.y.right=element_text(margin=margin(l=0.8*2.2/2), hjust=0),
             # margin param here adjust cluster title
             axis.title.y=element_text(angle=90, margin=margin(r=2.2/2)*10, vjust=1))
+}
+
+get_contact_segments <- function(patients) {
+  if (length(unique(patients)) > 1) {
+    d <- d.visits[d.visits$patient %in% patients, ]
+    d1 <- d$admission[d$patient==patients[1]]
+    d2 <- d$admission[d$patient==patients[2]]
+    
+    c <- lapply(d1, function(v) {
+      abs(d2 - v)
+    })
+    
+    d.diff <- as.data.frame(c)
+    d.enc <- data.frame(xs=NULL, xe=NULL, ys=NULL, ye=NULL)
+    for (j in 1:ncol(d.diff)) {
+      for (i in 1:nrow(d.diff)) {
+        if (d.diff[i,j] <= 0) {
+          ww <- d.diff[i,j]
+          d.enc_row <- data.frame(xs=d1[j], xe=d2[i], ys=1, ye=2)
+          d.enc <- rbind(d.enc, d.enc_row)
+        }
+      }
+    }
+    if (length(d.enc) > 0) {
+      l.contact <- geom_curve(data=d.enc, aes(x=ys, xend=ye, y=xs, yend=xe), colour='#abdda4', curvature=-0.25, size=2)
+      return(l.contact)
+    }
+  }
+  return(NULL)
 }
 
 timeline_legend <- function() {
@@ -335,6 +388,8 @@ l.legends <- list(timeline_legend(), amr_legend(), ggplot() + theme_void())
 g.legends <- ggarrange(plotlist=l.legends, nrow=3, ncol=1, heights=c(1,1,8))
 
 # Render
-pdf('output/timeline.pdf', height=30, width=8)
-ggarrange(g.timelines, g.legends, nrow=1, ncol=2, widths=c(1, 0.3))
+svg('timeline_raw.svg', height=30, width=8)
+{
+  ggarrange(g.timelines, g.legends, nrow=1, ncol=2, widths=c(1, 0.3))
+}
 dev.off()
