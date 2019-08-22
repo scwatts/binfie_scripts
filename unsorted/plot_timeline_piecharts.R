@@ -8,12 +8,17 @@
 
 # TODO: add snp distances
 
-### Init, opts and libraries
-setwd('~/writing/haemophilus_clinical/analysis/11_tranmission_carriage/')
-
+## Libraries
 require(ggplot2)
 require(reshape2)
 require(ggpubr)
+require(readODS)
+
+
+### Init and opts
+setwd('~/writing/haemophilus_clinical/figures/transmission_carriage/')
+
+options(stringsAsFactors=FALSE)
 
 .Options$species_colours <- c('Haemophilus influenzae'='#000000', 'Haemophilus parainfluenzae'='#ffffff', 'None'='#a0a0a0')
 .Options$amr_colours <- c('Ampicillin_Intermediate'='#efd490',
@@ -54,8 +59,8 @@ require(ggpubr)
 
 
 ### Data
-d.info <- read.table('../../sample_data/general/combined_data.tsv', header=TRUE, sep='\t', stringsAsFactors=FALSE)
-d.pheno <- read.table('../../sample_data/general/amr_phenotypes.tsv', header=TRUE, sep='\t', stringsAsFactors=FALSE)
+d.info <- read_ods('../../datasheets/compiled_data/isolates_received.ods')
+d.pheno <- read.table('../../datasheets/compiled_data/amr_phenotypes.tsv', header=TRUE, sep='\t')
 # Clusters
 read_clusters <- function(fp) {
   con <- file(fp, 'r')
@@ -69,7 +74,18 @@ d.clusters.hi <- read_clusters(d.clusters.hi.fp)
 d.clusters.hpi <- read_clusters(d.clusters.hpi.fp)
 
 # Visitation
-d.visits <- read_ods('../../sample_data/general/haemophilus_patient_visitation.ods', sheet='long_format')
+# Clinic
+d.visits_clinic_full <- read_ods('../../datasheets/compiled_data/patient_visitation.ods', sheet='long_format')
+# Exclude phone calls, include only relevant info
+d.visits_clinic <- d.visits_clinic_full[d.visits_clinic_full$visit!='phone', ]
+d.visits_clinic <- d.visits_clinic[ ,1:4]
+# Sampling
+d.visits_samples_full <- read_ods('../../datasheets/compiled_data/patient_data.ods', sheet='long_format')
+# Dedupliate and include only relevant info formatted to match clinic visitation data
+d.visits_samples <- unique(d.visits_samples_full[ ,1:3])
+d.visits_samples <- data.frame(patient=d.visits_samples$patient, visit='sample', admission=d.visits_samples$date, discharge='na')
+# Combine
+d.visits <- rbind(d.visits_clinic, d.visits_samples)
 # Set admission and discharge to dates
 d.visits$admission <- as.Date(d.visits$admission, format='%d/%m/%Y')
 d.visits$discharge <- as.Date(d.visits$discharge, format='%d/%m/%Y')
@@ -83,7 +99,7 @@ d.visits <- d.visits[d.visits$admission < "2017-02-23", ]
 
 ### Processing
 # Set age and date to appropriate types
-d.info$pariticpant_age <- as.numeric(d.info$pariticpant_age)
+d.info$patient_age <- as.numeric(d.info$patient_age)
 d.info$collection_date <- as.Date(d.info$collection_date, format='%d/%m/%Y')
 
 # Sort clusters by patient number
@@ -97,7 +113,7 @@ d.clusters.hpi <- d.clusters.hpi[sort(d.pn.hpi, index.return=TRUE)$ix]
 d.pheno[ ,-1][d.pheno[ ,-1] == 'Unknown'] <- 'None'
 
 # Convert pheno data for pie
-d.pheno.pie <- data.frame(sample=d.pheno$sample)
+d.pheno.pie <- data.frame(sample=d.pheno$identifier)
 l.cats <- c('Sensitive', 'None', 'Resistant', 'Intermediate')
 namr <- length(d.pheno) -1
 nsam <- length(d.pheno[ ,1])
@@ -118,22 +134,22 @@ d.pheno.pie$x <- d.pheno.pie$y <- Inf
 create_timeline_plot <- function(samples) {
   # Get data
   patients <- unique(sub('_[0-9]$', '', samples))
-  d.cluster <- d.info[d.info$participant %in% patients,c('participant', 'sample_number', 'filename', 'pariticpant_age', 'collection_date', 'species_genotyped')]
+  d.cluster <- d.info[d.info$patient %in% patients,c('patient', 'sample_number', 'identifier', 'patient_age', 'collection_date', 'species_genotyped')]
 
   # Create base plot for each patient - allow us to offset in-cluster and out-cluster points
-  d.dummy <- data.frame(participant=patients, collection_date=as.Date('2016-01-01'))
-  l.dummy <- geom_point(data=d.dummy, alpha=0, aes(x=participant, y=collection_date, participant=participant))
+  d.dummy <- data.frame(patient=patients, collection_date=as.Date('2016-01-01'))
+  l.dummy <- geom_point(data=d.dummy, alpha=0, aes(x=patient, y=collection_date, patient=patient))
   g <- ggplot() + l.dummy
   g.built <- ggplot_build(g)
   d.graph_base <- g.built$data[[1]]
 
   # Place all in-cluster samples above the line and out-cluster below
-  d.cluster$xbase <- d.graph_base$x[match(d.cluster$participant, d.graph_base$participant)]
-  d.cluster$x <- ifelse(d.cluster$filename %in% samples, d.cluster$xbase+.Options$timeline_offset, d.cluster$xbase-.Options$timeline_offset)
+  d.cluster$xbase <- d.graph_base$x[match(d.cluster$patient, d.graph_base$patient)]
+  d.cluster$x <- ifelse(d.cluster$identifier %in% samples, d.cluster$xbase+.Options$timeline_offset, d.cluster$xbase-.Options$timeline_offset)
 
   # Divide cluster data into overlapping and non-overlapping points
   d.splits.parts <- lapply(patients, function(p) {
-    d <- d.cluster[d.cluster$participant==p, ]
+    d <- d.cluster[d.cluster$patient==p, ]
     l.ov <- list()
     d.nov <- d[NULL, ]
     # Find overlaps within above and below points
@@ -164,10 +180,13 @@ create_timeline_plot <- function(samples) {
   }
 
   # Create layers for isolate geom_point
-  timeline_aes <- aes(x=x, y=collection_date, fill=species_genotyped, participant=filename)
+  timeline_aes <- aes(x=x, y=collection_date, fill=species_genotyped, patient=identifier)
   l.points <- NULL
-  l <- geom_point(data=d.splits$nov, timeline_aes, shape=21, size=.Options$point_size, colour='black')
-  l.points <- c(l.points, l)
+  # Add non-dodged points if we have them
+  if (length(d.splits$nov[ ,1]) > 0) {
+    l <- geom_point(data=d.splits$nov, timeline_aes, shape=21, size=.Options$point_size, colour='black')
+    l.points <- c(l.points, l)
+  }
   for (d.ov in d.splits$ov) {
     # Increase vertical position to offset dodge shapes from timeline
     if (all(d.ov$x > d.ov$xbase)) {
@@ -182,26 +201,26 @@ create_timeline_plot <- function(samples) {
   # Build next plot iteration which now contains isolate points and annotate timelines with segments and pies
   g <- base_plot() + l.dummy + l.points
   g.built <- ggplot_build(g)
-  d.graph_noanno <- do.call('rbind', lapply(g.built$data[-1], function(d) { d[ ,c('participant', 'x', 'y')] }))
+  d.graph_noanno <- do.call('rbind', lapply(g.built$data[-1], function(d) { d[ ,c('patient', 'x', 'y')] }))
 
   # Get layers for pie charts
-  g.pies <- get_pie_charts(d.cluster$filename, d.graph_noanno)
+  g.pies <- get_pie_charts(d.cluster$identifier, d.graph_noanno)
   
   # Get horizontal line segments - estimate birthdate
   d.segments.parts <- lapply(patients, function(p) {
-    d <- d.cluster[d.cluster$participant==p, ]
-    bds <- round(d$collection_date - d$pariticpant_age * 365, 1)
+    d <- d.cluster[d.cluster$patient==p, ]
+    bds <- round(d$collection_date - d$patient_age * 365, 1)
     bd <- mean(bds)
     y1 <- max(as.Date('2016-01-01'), as.Date(bd, origin='1970-01-01'))
     y2 <- as.Date('2017-03-01')
-    x1 <- x2 <- d.graph_base$x[d.graph_base$participant==p]
+    x1 <- x2 <- d.graph_base$x[d.graph_base$patient==p]
     data.frame(x1=x1, y1=y1, x2=x2, y2=y2)
   })
   d.segments_horizontal <- do.call('rbind', d.segments.parts)
   l.segments_horizontal <- geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=d.segments_horizontal, colour='#444444')
   
   # Get veritcal line segments
-  x.src <- d.graph_base$x[match(sub('_[0-9]+', '', d.graph_noanno$participant), d.graph_base$participant)]
+  x.src <- d.graph_base$x[match(sub('_[0-9]+', '', d.graph_noanno$patient), d.graph_base$patient)]
   y <- as.Date(d.graph_noanno$y, origin='1970-01-01')
   d.segments_vertical <- data.frame(x1=x.src, y1=y, x2=d.graph_noanno$x, y2=y)
   l.segments_vertical <- geom_segment(aes(x=x1, y=y1, xend=x2, yend=y2), data=d.segments_vertical, colour='#444444')
@@ -254,7 +273,7 @@ get_pie_charts <- function(samples, d.graph) {
   # Convert grob into a custom annotation
   lapply(names(g.pies), function(n) {
     g <- g.pies[[n]]
-    dd <- d.graph[d.graph$participant==n, ]
+    dd <- d.graph[d.graph$patient==n, ]
     annotation_custom(grob=ggplotGrob(g),
                       xmin=dd$x-.Options$pie_radius,
                       xmax=dd$x+.Options$pie_radius,
@@ -313,8 +332,8 @@ get_contact_segments <- function(patients) {
 
 timeline_legend <- function() {
   d.categories <- c('Haemophilus influenzae', 'Haemophilus parainfluenzae', 'None')
-  d <- data.frame(participant=1, collection_date=1, species_genotyped=d.categories, sample_number=1)
-  timeline_aes <- aes(x=participant, y=collection_date, fill=species_genotyped, group=sample_number)
+  d <- data.frame(patient=1, collection_date=1, species_genotyped=d.categories, sample_number=1)
+  timeline_aes <- aes(x=patient, y=collection_date, fill=species_genotyped, group=sample_number)
   g <- ggplot(d) + geom_point(timeline_aes, size=.Options$point_size, shape=21, colour='black')
   g <- g + scale_fill_manual(values=.Options$species_colours, guide=guide_legend(override.aes=list(shape=22)))
   g <- g + labs(fill='Genotyped species')
